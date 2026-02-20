@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Alive Robot</title>
+    <style>
+        /* Base page styling - Pure Black for OLED full-screen feel */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* SVG fills the entire screen */
+        svg {
+            width: 100%;
+            height: 100%;
+            /* Soft, ambient OLED glow */
+            filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.4));
+        }
+
+        /* The Eye & Mouth Styling */
+        .eye, #mouth-path {
+            fill: url(#eyeGrad);
+        }
+
+        /* The CSS transition handles only the blink scale now */
+        .eye {
+            transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Blink animation: squish vertically and widen horizontally */
+        .blink {
+            transform: scaleY(0.05) scaleX(1.1);
+        }
+
+        /* Idle Breathing Animation */
+        @keyframes breathe {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        #face-elements {
+            animation: breathe 5s ease-in-out infinite;
+        }
+
+        /* UI Controls Container */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 5;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: 500px;
+        }
+
+        .ui-btn {
+            background-color: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .ui-btn:hover {
+            background-color: #00ffff;
+            color: #000;
+        }
+
+        .ui-btn.active-toggle {
+            background-color: rgba(0, 255, 255, 0.4);
+        }
+
+        /* Automatically hide the controls when actually in fullscreen */
+        :fullscreen #controls { display: none; }
+        :-webkit-full-screen #controls { display: none; }
+        :-moz-full-screen #controls { display: none; }
+
+        /* UI Overlay for initial audio activation */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        #start-btn {
+            background-color: #00ffff;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
+            box-shadow: 0 4px 25px rgba(0, 255, 255, 0.5);
+        }
+
+        #start-btn:hover {
+            transform: scale(1.1);
+            background-color: #88ffff;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #aaaaaa;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <button id="toggle-eye-btn" class="ui-btn">Toggle Eye Shape</button>
+        <button id="toggle-mouth-btn" class="ui-btn active-toggle">Permanent Mouth: ON</button>
+        <button id="fullscreen-btn" class="ui-btn">Enter Fullscreen</button>
+    </div>
+
+    <div id="overlay">
+        <button id="start-btn">Wake Up Robot</button>
+        <div id="status">Microphone access required for natural lip sync.</div>
+    </div>
+
+    <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="eyeGrad" cx="50%" cy="50%" r="60%">
+                <stop offset="50%" stop-color="#00ffff" />
+                <stop offset="100%" stop-color="#0088cc" />
+            </radialGradient>
+        </defs>
+
+        <g id="face-elements">
+            
+            <g id="left-squint" style="transform-origin: 265px 175px;">
+                <rect class="eye squircle-eye" x="200" y="120" width="130" height="110" rx="40" style="transform-origin: 265px 175px;" />
+                
+                <g class="eilik-eye" style="display:none; transform: rotate(-8deg); transform-origin: 265px 175px;">
+                    <path class="eye" d="M 215 210 C 240 220, 290 220, 315 210 C 340 190, 340 130, 315 120 C 290 100, 240 100, 215 120 C 190 130, 190 190, 215 210 Z" style="transform-origin: 265px 175px;" />
+                </g>
+            </g>
+
+            <g id="right-squint" style="transform-origin: 535px 175px;">
+                <rect class="eye squircle-eye" x="470" y="120" width="130" height="110" rx="40" style="transform-origin: 535px 175px;" />
+                
+                <g class="eilik-eye" style="display:none; transform: rotate(8deg); transform-origin: 535px 175px;">
+                    <path class="eye" d="M 485 210 C 510 220, 560 220, 585 210 C 610 190, 610 130, 585 120 C 560 100, 510 100, 485 120 C 460 130, 460 190, 485 210 Z" style="transform-origin: 535px 175px;" />
+                </g>
+            </g>
+
+            <path id="mouth-path" d="" style="opacity: 1;" />
+        </g>
+    </svg>
+
+    <script>
+        // --- UI & Controls Logic ---
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            }
+        });
+
+        // Eye Toggle
+        const toggleEyeBtn = document.getElementById('toggle-eye-btn');
+        const squircleEyes = document.querySelectorAll('.squircle-eye');
+        const eilikEyes = document.querySelectorAll('.eilik-eye');
+        let isSquircle = true;
+
+        toggleEyeBtn.addEventListener('click', () => {
+            isSquircle = !isSquircle;
+            if (isSquircle) {
+                squircleEyes.forEach(el => el.style.display = 'block');
+                eilikEyes.forEach(el => el.style.display = 'none');
+            } else {
+                squircleEyes.forEach(el => el.style.display = 'none');
+                eilikEyes.forEach(el => el.style.display = 'block');
+            }
+        });
+
+        // Mouth Toggle
+        const toggleMouthBtn = document.getElementById('toggle-mouth-btn');
+        let isPermanentMouth = true;
+
+        toggleMouthBtn.addEventListener('click', () => {
+            isPermanentMouth = !isPermanentMouth;
+            if (isPermanentMouth) {
+                toggleMouthBtn.innerText = "Permanent Mouth: ON";
+                toggleMouthBtn.classList.add('active-toggle');
+            } else {
+                toggleMouthBtn.innerText = "Permanent Mouth: OFF";
+                toggleMouthBtn.classList.remove('active-toggle');
+            }
+        });
+
+
+        // --- Screen Wake Lock Logic ---
+        let wakeLock = null;
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try { wakeLock = await navigator.wakeLock.request('screen'); } 
+                catch (err) { console.error(`Wake Lock error: ${err.message}`); }
+            }
+        }
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+
+        // --- Audio & Animation Logic ---
+        let audioCtx, analyser, freqData, timeData;
+        const mouthPath = document.getElementById('mouth-path');
+        const leftSquint = document.getElementById('left-squint');
+        const rightSquint = document.getElementById('right-squint');
+        
+        const startBtn = document.getElementById('start-btn');
+        const overlay = document.getElementById('overlay');
+        const statusText = document.getElementById('status');
+
+        const mouthCenter = { x: 400, y: 350 };
+        const mouthThickness = 10; 
+        
+        // Morphing Targets
+        let currentMouth = { w: 75, hTop: 0, hBottom: 0 };
+        let targetMouth  = { w: 75, hTop: 0, hBottom: 0 };
+        
+        // Opacity Targets (For vanishing mouth feature)
+        let currentOpacity = 1.0;
+        let targetOpacity = 1.0;
+
+        let currentSquint = 1.0;
+        let currentSquintY = 0.0;
+        let targetSquint = 1.0;
+        let targetSquintY = 0.0;
+
+        function lerp(start, end, factor) {
+            return start + (end - start) * factor;
+        }
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                startBtn.innerText = "Listening...";
+                statusText.innerText = "Requesting microphone access...";
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaStreamSource(stream);
+                analyser = audioCtx.createAnalyser();
+                
+                analyser.fftSize = 512;
+                analyser.smoothingTimeConstant = 0.85; 
+                
+                source.connect(analyser);
+                freqData = new Uint8Array(analyser.frequencyBinCount);
+                timeData = new Uint8Array(analyser.frequencyBinCount);
+                
+                overlay.style.display = 'none';
+                
+                await requestWakeLock();
+
+                requestAnimationFrame(animateFace);
+                scheduleBlink();
+
+            } catch (err) {
+                console.error("Audio initialization failed:", err);
+                statusText.innerText = "Error: Could not access microphone.";
+                startBtn.innerText = "Try Again";
+            }
+        });
+
+        function animateFace() {
+            analyser.getByteFrequencyData(freqData);
+            analyser.getByteTimeDomainData(timeData);
+
+            let sumSquares = 0;
+            for(let i = 0; i < timeData.length; i++) {
+                let val = (timeData[i] - 128) / 128; 
+                sumSquares += val * val;
+            }
+            let rms = Math.sqrt(sumSquares / timeData.length);
+            let volume = rms * 100; 
+
+            let lowSum = 0, midSum = 0;
+            for(let i = 3; i <= 10; i++) lowSum += freqData[i];  
+            for(let i = 11; i <= 30; i++) midSum += freqData[i]; 
+
+            const lowAvg = lowSum / 8;
+            const midAvg = midSum / 20;
+
+            if (volume > 1.5) { 
+                let volFactor = Math.min(volume / 15, 1.3); 
+
+                // Mouth is actively speaking, make sure it is fully visible
+                targetOpacity = 1.0;
+
+                // --- AUDIO REACTIVE SQUINT ---
+                targetSquint = 1.0 - (volFactor * 0.15); 
+                targetSquintY = -(volFactor * 8);
+
+                // --- MOUTH SHAPES ---
+                if (midAvg > lowAvg * 1.1) {
+                    targetMouth = { w: 80 + (volFactor * 30), hTop: 5 + (volFactor * 5), hBottom: 30 + (volFactor * 70) };
+                } else if (lowAvg > midAvg * 1.1) {
+                    targetMouth = { w: 45 + (volFactor * 15), hTop: 25 + (volFactor * 40), hBottom: 25 + (volFactor * 50) };
+                } else {
+                    targetMouth = { w: 75 + (volFactor * 15), hTop: 5 + (volFactor * 10), hBottom: 20 + (volFactor * 35) };
+                }
+            } else {
+                targetSquint = 1.0;
+                targetSquintY = 0.0;
+                targetMouth = { w: 75, hTop: 0, hBottom: 0 };
+                
+                // If the user turned off the permanent mouth, smoothly fade it out to 0
+                targetOpacity = isPermanentMouth ? 1.0 : 0.0;
+            }
+
+            // Lerp everything for smooth gliding
+            currentMouth.w = lerp(currentMouth.w, targetMouth.w, 0.15);
+            currentMouth.hTop = lerp(currentMouth.hTop, targetMouth.hTop, 0.15);
+            currentMouth.hBottom = lerp(currentMouth.hBottom, targetMouth.hBottom, 0.15);
+            
+            currentSquint = lerp(currentSquint, targetSquint, 0.15);
+            currentSquintY = lerp(currentSquintY, targetSquintY, 0.15);
+
+            currentOpacity = lerp(currentOpacity, targetOpacity, 0.15);
+
+            // Apply Squints to Wrapper Groups
+            leftSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
+            rightSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
+
+            // Apply Opacity to the Mouth
+            mouthPath.style.opacity = currentOpacity;
+
+            // Path Generation for Mouth
+            const x1 = mouthCenter.x - currentMouth.w;
+            const x2 = mouthCenter.x + currentMouth.w;
+            const y1 = mouthCenter.y - mouthThickness;
+            const y2 = mouthCenter.y + mouthThickness;
+            
+            const cpYTop = y1 - currentMouth.hTop;
+            const cpYBot = y2 + currentMouth.hBottom;
+
+            const d = `
+                M ${x1} ${y1}
+                Q ${mouthCenter.x} ${cpYTop} ${x2} ${y1}
+                A ${mouthThickness} ${mouthThickness} 0 0 1 ${x2} ${y2}
+                Q ${mouthCenter.x} ${cpYBot} ${x1} ${y2}
+                A ${mouthThickness} ${mouthThickness} 0 0 1 ${x1} ${y1}
+                Z
+            `;
+            
+            mouthPath.setAttribute('d', d);
+
+            requestAnimationFrame(animateFace);
+        }
+
+        // --- Humanized Blinking Logic ---
+        function triggerBlink() {
+            const eyes = document.querySelectorAll('.eye:not([style*="display: none"])');
+            eyes.forEach(eye => eye.classList.add('blink'));
+            setTimeout(() => {
+                eyes.forEach(eye => eye.classList.remove('blink'));
+            }, 120); 
+        }
+
+        function scheduleBlink() {
+            const nextBlink = Math.random() * 3500 + 2000; 
+            
+            setTimeout(() => {
+                triggerBlink();
+                if (Math.random() < 0.20) {
+                    setTimeout(triggerBlink, 200); 
+                }
+                scheduleBlink();
+            }, nextBlink);
+        }
+    </script>
+</body>
+</html>
