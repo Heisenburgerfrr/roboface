@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen Alive Robot</title>
+    <title>Full Screen Alive Steve (Bald Edition)</title>
     <style>
-        /* Base page styling - Pure Black for OLED full-screen feel */
+        /* Base page styling - Steve's Skin Tone Background */
         body {
             margin: 0;
             padding: 0;
-            background-color: #000000;
+            background-color: #B07D60;
             display: flex;
             flex-direction: row; 
             width: 100vw;
             height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             color: white;
             overflow: hidden;
         }
@@ -23,33 +23,31 @@
         svg {
             flex-grow: 1;
             height: 100%;
-            /* Soft, ambient OLED glow */
-            filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.4));
         }
 
-        /* The Eye & Mouth Styling */
-        .eye, #mouth-path {
-            fill: url(#eyeGrad);
+        /* Force perfect pixel-art rendering on all SVG elements */
+        svg * {
+            shape-rendering: crispEdges;
         }
 
-        /* The CSS transition handles only the blink scale now */
         .eye {
             transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
         }
 
-        /* Blink animation: squish vertically and widen horizontally */
+        /* Minecraft blink: strict vertical squish */
         .blink {
-            transform: scaleY(0.05) scaleX(1.1);
+            transform: scaleY(0.1);
         }
 
-        /* Idle Breathing Animation */
+        /* Idle Animation: Subtle blocky bounce */
         @keyframes breathe {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-4px); }
         }
 
         #face-elements {
-            animation: breathe 5s ease-in-out infinite;
+            animation: breathe 5s steps(2, end) infinite;
         }
 
         /* --- Sidebar Controls --- */
@@ -58,7 +56,7 @@
             height: 100vh;
             flex-shrink: 0; 
             background-color: #585858;
-            border-right: 4px solid #000000; 
+            border-right: 4px solid #000000;
             box-shadow: inset 4px 0px 0px #828282; 
             display: flex;
             flex-direction: column;
@@ -124,13 +122,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            backdrop-filter: blur(5px);
         }
 
         #start-btn {
@@ -153,7 +150,7 @@
 
         #start-btn:active {
             box-shadow: inset 4px 4px 0px #2E7D32, inset -4px -4px 0px #81C784;
-            transform: scale(0.96);
+            transform: scale(0.96); 
         }
 
         #status {
@@ -169,74 +166,49 @@
 
     <div id="controls">
         <h2 class="sidebar-title">CONTROLS</h2>
-        <button id="nav-steve-btn" class="ui-btn">Switch to Steve</button>
-        <button id="toggle-eye-btn" class="ui-btn">Shape: Squircle</button>
-        
-        <button id="toggle-idle-mouth-btn" class="ui-btn">Idle Mouth: Straight</button>
-        
+        <button id="nav-emo-btn" class="ui-btn">Switch to Emo</button>
         <button id="toggle-mouth-btn" class="ui-btn active-toggle">Mouth Line: ON</button>
         <button id="fullscreen-btn" class="ui-btn">Fullscreen</button>
     </div>
 
     <div id="overlay">
-        <button id="start-btn">Wake Up Robot</button>
-        <div id="status">Microphone access required for natural lip sync.</div>
+        <button id="start-btn">Wake Up Steve</button>
+        <div id="status">Microphone access required for blocky lip sync.</div>
     </div>
 
     <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <radialGradient id="eyeGrad" cx="50%" cy="50%" r="60%">
-                <stop offset="50%" stop-color="#00ffff" />
-                <stop offset="100%" stop-color="#0088cc" />
-            </radialGradient>
-        </defs>
-
         <g id="face-elements">
             
-            <g id="left-squint" style="transform-origin: 265px 175px;">
-                <rect class="eye squircle-eye" x="200" y="120" width="130" height="110" rx="40" style="transform-origin: 265px 175px;" />
-                
-                <g class="eilik-eye" style="display:none; transform: rotate(-8deg); transform-origin: 265px 175px;">
-                    <path class="eye" d="M 215 210 C 240 220, 290 220, 315 210 C 340 190, 340 130, 315 120 C 290 100, 240 100, 215 120 C 190 130, 190 190, 215 210 Z" style="transform-origin: 265px 175px;" />
+            <rect x="340" y="200" width="120" height="60" fill="#8B614A" />
+
+            <rect x="280" y="260" width="60" height="60" fill="#412A1B" />
+            <rect x="460" y="260" width="60" height="60" fill="#412A1B" />
+            <rect x="340" y="320" width="120" height="60" fill="#412A1B" />
+
+            <g id="left-squint" style="transform-origin: 280px 170px;">
+                <g class="eye" style="transform-origin: 280px 170px;">
+                    <rect x="220" y="140" width="60" height="60" fill="#ffffff" />
+                    <rect x="280" y="140" width="60" height="60" fill="#494697" />
                 </g>
-
-                <path class="eye custom-eye-wide" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
-                      d="M 195 177.8 C 195 149.8, 237 135.8, 265 135.8 C 290.2 135.8, 323.8 149.8, 323.8 177.8 C 323.8 203, 301.4 214.2, 279 211.4 C 267.8 208.6, 259.4 208.6, 251 211.4 C 225.8 214.2, 195 208.6, 195 177.8 Z" />
-
-                <path class="eye custom-eye-tall" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
-                      d="M 214.4 178.6 C 214.4 142.6, 247.4 124.6, 269.4 124.6 C 289.2 124.6, 315.6 142.6, 315.6 178.6 C 315.6 211, 298 225.4, 280.4 221.8 C 271.6 218.2, 265 218.2, 258.4 221.8 C 238.6 225.4, 214.4 218.2, 214.4 178.6 Z" />
-
-                <path class="eye custom-eye-nodivot" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
-                      d="M 214.4 178.6 C 214.4 142.6, 247.4 124.6, 269.4 124.6 C 289.2 124.6, 315.6 142.6, 315.6 178.6 C 315.6 215, 295 228, 265 228 C 235 228, 214.4 215, 214.4 178.6 Z" />
             </g>
 
-            <g id="right-squint" style="transform-origin: 535px 175px;">
-                <rect class="eye squircle-eye" x="470" y="120" width="130" height="110" rx="40" style="transform-origin: 535px 175px;" />
-                
-                <g class="eilik-eye" style="display:none; transform: rotate(8deg); transform-origin: 535px 175px;">
-                    <path class="eye" d="M 485 210 C 510 220, 560 220, 585 210 C 610 190, 610 130, 585 120 C 560 100, 510 100, 485 120 C 460 130, 460 190, 485 210 Z" style="transform-origin: 535px 175px;" />
+            <g id="right-squint" style="transform-origin: 520px 170px;">
+                <g class="eye" style="transform-origin: 520px 170px;">
+                    <rect x="460" y="140" width="60" height="60" fill="#494697" />
+                    <rect x="520" y="140" width="60" height="60" fill="#ffffff" />
                 </g>
-
-                <path class="eye custom-eye-wide" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
-                      d="M 465 177.8 C 465 149.8, 507 135.8, 535 135.8 C 560.2 135.8, 593.8 149.8, 593.8 177.8 C 593.8 203, 571.4 214.2, 549 211.4 C 537.8 208.6, 529.4 208.6, 521 211.4 C 495.8 214.2, 465 208.6, 465 177.8 Z" />
-
-                <path class="eye custom-eye-tall" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
-                      d="M 484.4 178.6 C 484.4 142.6, 517.4 124.6, 539.4 124.6 C 559.2 124.6, 585.6 142.6, 585.6 178.6 C 585.6 211, 568 225.4, 550.4 221.8 C 541.6 218.2, 535 218.2, 528.4 221.8 C 508.6 225.4, 484.4 218.2, 484.4 178.6 Z" />
-
-                <path class="eye custom-eye-nodivot" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
-                      d="M 484.4 178.6 C 484.4 142.6, 517.4 124.6, 539.4 124.6 C 559.2 124.6, 585.6 142.6, 585.6 178.6 C 585.6 215, 565 228, 535 228 C 505 228, 484.4 215, 484.4 178.6 Z" />
             </g>
 
-            <path id="mouth-path" d="" style="opacity: 1;" />
+            <path id="mouth-path" fill="#1A110B" d="" style="opacity: 1;" />
         </g>
     </svg>
 
     <script>
     (() => {
-        // --- Navigation Logic ---
-        const navSteveBtn = document.getElementById('nav-steve-btn');
-        navSteveBtn.addEventListener('click', () => {
-            window.location.href = 'steve.html';
+        // --- UI & Navigation Logic ---
+        const navEmoBtn = document.getElementById('nav-emo-btn');
+        navEmoBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
         });
 
         const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -246,43 +218,6 @@
             }
         });
 
-        // --- Eye Toggle Logic ---
-        const toggleEyeBtn = document.getElementById('toggle-eye-btn');
-        const squircleEyes = document.querySelectorAll('.squircle-eye');
-        const eilikEyes = document.querySelectorAll('.eilik-eye');
-        const customWideEyes = document.querySelectorAll('.custom-eye-wide');
-        const customTallEyes = document.querySelectorAll('.custom-eye-tall');
-        const customNoDivotEyes = document.querySelectorAll('.custom-eye-nodivot');
-        
-        let eyeMode = 0; 
-
-        toggleEyeBtn.addEventListener('click', () => {
-            eyeMode = (eyeMode + 1) % 5; 
-            
-            squircleEyes.forEach(el => el.style.display = (eyeMode === 0) ? 'block' : 'none');
-            eilikEyes.forEach(el => el.style.display = (eyeMode === 1) ? 'block' : 'none');
-            customWideEyes.forEach(el => el.style.display = (eyeMode === 2) ? 'block' : 'none');
-            customTallEyes.forEach(el => el.style.display = (eyeMode === 3) ? 'block' : 'none');
-            customNoDivotEyes.forEach(el => el.style.display = (eyeMode === 4) ? 'block' : 'none');
-
-            const modeNames = ["Shape: Squircle", "Shape: Emo/Eilik", "Shape: Wide Bean", "Shape: Tall Bean", "Shape: Smooth Pill"];
-            toggleEyeBtn.innerText = modeNames[eyeMode];
-        });
-
-        // --- NEW: Idle Mouth Style Toggle ---
-        const toggleIdleMouthBtn = document.getElementById('toggle-idle-mouth-btn');
-        let isIdleSmile = false;
-
-        toggleIdleMouthBtn.addEventListener('click', () => {
-            isIdleSmile = !isIdleSmile;
-            if (isIdleSmile) {
-                toggleIdleMouthBtn.innerText = "Idle Mouth: Smile";
-            } else {
-                toggleIdleMouthBtn.innerText = "Idle Mouth: Straight";
-            }
-        });
-
-        // Mouth Permanent Toggle
         const toggleMouthBtn = document.getElementById('toggle-mouth-btn');
         let isPermanentMouth = true;
 
@@ -297,7 +232,6 @@
             }
         });
 
-        // Screen Wake Lock Logic
         let wakeLock = null;
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
@@ -311,30 +245,26 @@
             }
         });
 
-        // --- Audio & Animation Logic ---
         let audioCtx, analyser, freqData, timeData;
-        let animationFrameId;
-
+        let animationFrameId; 
+        
         const mouthPath = document.getElementById('mouth-path');
         const leftSquint = document.getElementById('left-squint');
         const rightSquint = document.getElementById('right-squint');
-        
         const startBtn = document.getElementById('start-btn');
         const overlay = document.getElementById('overlay');
         const statusText = document.getElementById('status');
+        const allEyes = document.querySelectorAll('.eye');
 
-        const mouthCenter = { x: 400, y: 350 };
-        const mouthThickness = 10; 
+        const mouthCenter = { x: 400, y: 290 };
+        const mouthThickness = 30; 
+        const defaultMouthWidth = 60; 
         
-        let currentMouth = { w: 75, hTop: 0, hBottom: 0 };
-        let targetMouth  = { w: 75, hTop: 0, hBottom: 0 };
-        
+        let currentMouth = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
+        let targetMouth  = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
         let currentOpacity = 1.0;
         let targetOpacity = 1.0;
-
-        let currentSquint = 1.0;
         let currentSquintY = 0.0;
-        let targetSquint = 1.0;
         let targetSquintY = 0.0;
 
         function lerp(start, end, factor) {
@@ -345,11 +275,13 @@
         async function initializeRobot(isAuto = false) {
             try {
                 if (!isAuto) {
-                    startBtn.innerText = "Listening...";
+                    startBtn.innerText = "Connecting...";
                     statusText.innerText = "Requesting microphone access...";
                 }
                 
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                // Save flag to memory so it instantly bypasses next time
                 sessionStorage.setItem('micGranted', 'true'); 
                 
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -363,9 +295,12 @@
                 freqData = new Uint8Array(analyser.frequencyBinCount);
                 timeData = new Uint8Array(analyser.frequencyBinCount);
                 
+                // Ensure overlay is gone
                 overlay.style.display = 'none';
+                
                 await requestWakeLock();
 
+                // If browser suspended audio due to autoplay policies, wake it up on the next physical click anywhere
                 if (audioCtx.state === 'suspended') {
                     const resumeAudio = () => {
                         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -383,7 +318,7 @@
 
             } catch (err) {
                 console.error("Audio initialization failed:", err);
-                overlay.style.display = 'flex'; 
+                overlay.style.display = 'flex'; // Bring overlay back if it fails
                 if (!isAuto) {
                     statusText.innerText = "Error: Could not access microphone.";
                     startBtn.innerText = "Try Again";
@@ -391,11 +326,14 @@
             }
         }
 
+        // Attach manual click
         startBtn.addEventListener('click', () => initializeRobot(false));
 
+        // --- INSTANT Auto-Bypass Logic ---
         async function tryAutoStart() {
             let isGranted = sessionStorage.getItem('micGranted') === 'true';
             
+            // If session storage isn't set, try to query the browser permission API
             if (!isGranted && navigator.permissions && navigator.permissions.query) {
                 try {
                     const perm = await navigator.permissions.query({ name: 'microphone' });
@@ -404,11 +342,14 @@
             }
 
             if (isGranted) {
+                // Instantly hide the overlay to prevent the flashing screen
                 overlay.style.display = 'none';
+                // Start the engine quietly in the background
                 initializeRobot(true);
             }
         }
         
+        // Run bypass check immediately on load
         tryAutoStart();
 
         function animateFace() {
@@ -423,85 +364,47 @@
             let rms = Math.sqrt(sumSquares / timeData.length);
             let volume = rms * 100; 
 
-            let lowSum = 0, midSum = 0;
-            for(let i = 3; i <= 10; i++) lowSum += freqData[i];  
-            for(let i = 11; i <= 30; i++) midSum += freqData[i]; 
-
-            const lowAvg = lowSum / 8;
-            const midAvg = midSum / 20;
-
             if (volume > 1.5) { 
                 let volFactor = Math.min(volume / 15, 1.3); 
 
                 targetOpacity = 1.0;
-                targetSquint = 1.0 - (volFactor * 0.15); 
-                targetSquintY = -(volFactor * 8);
+                targetSquintY = -(volFactor * 4); 
 
-                if (midAvg > lowAvg * 1.1) {
-                    targetMouth = { w: 80 + (volFactor * 30), hTop: 5 + (volFactor * 5), hBottom: 30 + (volFactor * 70) };
-                } else if (lowAvg > midAvg * 1.1) {
-                    targetMouth = { w: 45 + (volFactor * 15), hTop: 25 + (volFactor * 40), hBottom: 25 + (volFactor * 50) };
-                } else {
-                    targetMouth = { w: 75 + (volFactor * 15), hTop: 5 + (volFactor * 10), hBottom: 20 + (volFactor * 35) };
-                }
+                targetMouth = { 
+                    w: defaultMouthWidth, 
+                    hTop: 0, 
+                    hBottom: 10 + (volFactor * 50) 
+                };
             } else {
-                targetSquint = 1.0;
                 targetSquintY = 0.0;
-                
-                // --- NEW: Applying the Straight vs Smile State ---
-                if (isIdleSmile) {
-                    // Makes a cute U-shaped curve
-                    targetMouth = { w: 65, hTop: -25, hBottom: 25 }; 
-                } else {
-                    // Classic flat pill line
-                    targetMouth = { w: 75, hTop: 0, hBottom: 0 };
-                }
-                
+                targetMouth = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
                 targetOpacity = isPermanentMouth ? 1.0 : 0.0;
             }
 
-            // Lerp everything for smooth gliding
             currentMouth.w = lerp(currentMouth.w, targetMouth.w, 0.15);
-            currentMouth.hTop = lerp(currentMouth.hTop, targetMouth.hTop, 0.15);
             currentMouth.hBottom = lerp(currentMouth.hBottom, targetMouth.hBottom, 0.15);
-            
-            currentSquint = lerp(currentSquint, targetSquint, 0.15);
             currentSquintY = lerp(currentSquintY, targetSquintY, 0.15);
             currentOpacity = lerp(currentOpacity, targetOpacity, 0.15);
 
-            // Apply Squints to Wrapper Groups
-            leftSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
-            rightSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
+            leftSquint.setAttribute('transform', `translate(0, ${currentSquintY})`);
+            rightSquint.setAttribute('transform', `translate(0, ${currentSquintY})`);
             mouthPath.style.opacity = currentOpacity;
 
-            // Path Generation for Mouth
             const x1 = mouthCenter.x - currentMouth.w;
             const x2 = mouthCenter.x + currentMouth.w;
-            const y1 = mouthCenter.y - mouthThickness;
-            const y2 = mouthCenter.y + mouthThickness;
-            
-            const cpYTop = y1 - currentMouth.hTop;
-            const cpYBot = y2 + currentMouth.hBottom;
+            const y1 = mouthCenter.y - mouthThickness; 
+            const y2 = mouthCenter.y + mouthThickness + currentMouth.hBottom; 
 
-            const d = `
-                M ${x1} ${y1}
-                Q ${mouthCenter.x} ${cpYTop} ${x2} ${y1}
-                A ${mouthThickness} ${mouthThickness} 0 0 1 ${x2} ${y2}
-                Q ${mouthCenter.x} ${cpYBot} ${x1} ${y2}
-                A ${mouthThickness} ${mouthThickness} 0 0 1 ${x1} ${y1}
-                Z
-            `;
-            
+            const d = `M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y2} L ${x1} ${y2} Z`;
             mouthPath.setAttribute('d', d);
 
             animationFrameId = requestAnimationFrame(animateFace);
         }
 
         function triggerBlink() {
-            const eyes = document.querySelectorAll('.eye:not([style*="display: none"])');
-            eyes.forEach(eye => eye.classList.add('blink'));
+            allEyes.forEach(eye => eye.classList.add('blink'));
             setTimeout(() => {
-                eyes.forEach(eye => eye.classList.remove('blink'));
+                allEyes.forEach(eye => eye.classList.remove('blink'));
             }, 120); 
         }
 
