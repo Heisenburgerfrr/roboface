@@ -11,7 +11,7 @@
             padding: 0;
             background-color: #000000;
             display: flex;
-            flex-direction: row; /* Aligns sidebar and SVG side-by-side */
+            flex-direction: row; 
             width: 100vw;
             height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -56,9 +56,9 @@
         #controls {
             width: 260px;
             height: 100vh;
-            flex-shrink: 0; /* Prevents the sidebar from squishing on small screens */
+            flex-shrink: 0; 
             background-color: #585858;
-            border-right: 4px solid #000000; /* Dark border on the right side now */
+            border-right: 4px solid #000000; 
             box-shadow: inset 4px 0px 0px #828282; 
             display: flex;
             flex-direction: column;
@@ -170,7 +170,10 @@
     <div id="controls">
         <h2 class="sidebar-title">CONTROLS</h2>
         <button id="nav-steve-btn" class="ui-btn">Switch to Steve</button>
-        <button id="toggle-eye-btn" class="ui-btn">Toggle Eye Shape</button>
+        <button id="toggle-eye-btn" class="ui-btn">Shape: Squircle</button>
+        
+        <button id="toggle-idle-mouth-btn" class="ui-btn">Idle Mouth: Straight</button>
+        
         <button id="toggle-mouth-btn" class="ui-btn active-toggle">Mouth Line: ON</button>
         <button id="fullscreen-btn" class="ui-btn">Fullscreen</button>
     </div>
@@ -196,6 +199,15 @@
                 <g class="eilik-eye" style="display:none; transform: rotate(-8deg); transform-origin: 265px 175px;">
                     <path class="eye" d="M 215 210 C 240 220, 290 220, 315 210 C 340 190, 340 130, 315 120 C 290 100, 240 100, 215 120 C 190 130, 190 190, 215 210 Z" style="transform-origin: 265px 175px;" />
                 </g>
+
+                <path class="eye custom-eye-wide" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
+                      d="M 195 177.8 C 195 149.8, 237 135.8, 265 135.8 C 290.2 135.8, 323.8 149.8, 323.8 177.8 C 323.8 203, 301.4 214.2, 279 211.4 C 267.8 208.6, 259.4 208.6, 251 211.4 C 225.8 214.2, 195 208.6, 195 177.8 Z" />
+
+                <path class="eye custom-eye-tall" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
+                      d="M 214.4 178.6 C 214.4 142.6, 247.4 124.6, 269.4 124.6 C 289.2 124.6, 315.6 142.6, 315.6 178.6 C 315.6 211, 298 225.4, 280.4 221.8 C 271.6 218.2, 265 218.2, 258.4 221.8 C 238.6 225.4, 214.4 218.2, 214.4 178.6 Z" />
+
+                <path class="eye custom-eye-nodivot" fill="#22F4FE" style="display:none; transform-origin: 265px 175px;" 
+                      d="M 214.4 178.6 C 214.4 142.6, 247.4 124.6, 269.4 124.6 C 289.2 124.6, 315.6 142.6, 315.6 178.6 C 315.6 215, 295 228, 265 228 C 235 228, 214.4 215, 214.4 178.6 Z" />
             </g>
 
             <g id="right-squint" style="transform-origin: 535px 175px;">
@@ -204,6 +216,15 @@
                 <g class="eilik-eye" style="display:none; transform: rotate(8deg); transform-origin: 535px 175px;">
                     <path class="eye" d="M 485 210 C 510 220, 560 220, 585 210 C 610 190, 610 130, 585 120 C 560 100, 510 100, 485 120 C 460 130, 460 190, 485 210 Z" style="transform-origin: 535px 175px;" />
                 </g>
+
+                <path class="eye custom-eye-wide" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
+                      d="M 465 177.8 C 465 149.8, 507 135.8, 535 135.8 C 560.2 135.8, 593.8 149.8, 593.8 177.8 C 593.8 203, 571.4 214.2, 549 211.4 C 537.8 208.6, 529.4 208.6, 521 211.4 C 495.8 214.2, 465 208.6, 465 177.8 Z" />
+
+                <path class="eye custom-eye-tall" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
+                      d="M 484.4 178.6 C 484.4 142.6, 517.4 124.6, 539.4 124.6 C 559.2 124.6, 585.6 142.6, 585.6 178.6 C 585.6 211, 568 225.4, 550.4 221.8 C 541.6 218.2, 535 218.2, 528.4 221.8 C 508.6 225.4, 484.4 218.2, 484.4 178.6 Z" />
+
+                <path class="eye custom-eye-nodivot" fill="#22F4FE" style="display:none; transform-origin: 535px 175px;" 
+                      d="M 484.4 178.6 C 484.4 142.6, 517.4 124.6, 539.4 124.6 C 559.2 124.6, 585.6 142.6, 585.6 178.6 C 585.6 215, 565 228, 535 228 C 505 228, 484.4 215, 484.4 178.6 Z" />
             </g>
 
             <path id="mouth-path" d="" style="opacity: 1;" />
@@ -225,24 +246,43 @@
             }
         });
 
-        // Eye Toggle
+        // --- Eye Toggle Logic ---
         const toggleEyeBtn = document.getElementById('toggle-eye-btn');
         const squircleEyes = document.querySelectorAll('.squircle-eye');
         const eilikEyes = document.querySelectorAll('.eilik-eye');
-        let isSquircle = true;
+        const customWideEyes = document.querySelectorAll('.custom-eye-wide');
+        const customTallEyes = document.querySelectorAll('.custom-eye-tall');
+        const customNoDivotEyes = document.querySelectorAll('.custom-eye-nodivot');
+        
+        let eyeMode = 0; 
 
         toggleEyeBtn.addEventListener('click', () => {
-            isSquircle = !isSquircle;
-            if (isSquircle) {
-                squircleEyes.forEach(el => el.style.display = 'block');
-                eilikEyes.forEach(el => el.style.display = 'none');
+            eyeMode = (eyeMode + 1) % 5; 
+            
+            squircleEyes.forEach(el => el.style.display = (eyeMode === 0) ? 'block' : 'none');
+            eilikEyes.forEach(el => el.style.display = (eyeMode === 1) ? 'block' : 'none');
+            customWideEyes.forEach(el => el.style.display = (eyeMode === 2) ? 'block' : 'none');
+            customTallEyes.forEach(el => el.style.display = (eyeMode === 3) ? 'block' : 'none');
+            customNoDivotEyes.forEach(el => el.style.display = (eyeMode === 4) ? 'block' : 'none');
+
+            const modeNames = ["Shape: Squircle", "Shape: Emo/Eilik", "Shape: Wide Bean", "Shape: Tall Bean", "Shape: Smooth Pill"];
+            toggleEyeBtn.innerText = modeNames[eyeMode];
+        });
+
+        // --- NEW: Idle Mouth Style Toggle ---
+        const toggleIdleMouthBtn = document.getElementById('toggle-idle-mouth-btn');
+        let isIdleSmile = false;
+
+        toggleIdleMouthBtn.addEventListener('click', () => {
+            isIdleSmile = !isIdleSmile;
+            if (isIdleSmile) {
+                toggleIdleMouthBtn.innerText = "Idle Mouth: Smile";
             } else {
-                squircleEyes.forEach(el => el.style.display = 'none');
-                eilikEyes.forEach(el => el.style.display = 'block');
+                toggleIdleMouthBtn.innerText = "Idle Mouth: Straight";
             }
         });
 
-        // Mouth Toggle
+        // Mouth Permanent Toggle
         const toggleMouthBtn = document.getElementById('toggle-mouth-btn');
         let isPermanentMouth = true;
 
@@ -310,8 +350,6 @@
                 }
                 
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                
-                // Save flag to memory so it instantly bypasses next time
                 sessionStorage.setItem('micGranted', 'true'); 
                 
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -325,12 +363,9 @@
                 freqData = new Uint8Array(analyser.frequencyBinCount);
                 timeData = new Uint8Array(analyser.frequencyBinCount);
                 
-                // Ensure overlay is gone
                 overlay.style.display = 'none';
-                
                 await requestWakeLock();
 
-                // If browser suspended audio due to autoplay policies, wake it up on the next physical click anywhere
                 if (audioCtx.state === 'suspended') {
                     const resumeAudio = () => {
                         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -348,7 +383,7 @@
 
             } catch (err) {
                 console.error("Audio initialization failed:", err);
-                overlay.style.display = 'flex'; // Bring overlay back if it fails
+                overlay.style.display = 'flex'; 
                 if (!isAuto) {
                     statusText.innerText = "Error: Could not access microphone.";
                     startBtn.innerText = "Try Again";
@@ -356,14 +391,11 @@
             }
         }
 
-        // Attach manual click
         startBtn.addEventListener('click', () => initializeRobot(false));
 
-        // --- INSTANT Auto-Bypass Logic ---
         async function tryAutoStart() {
             let isGranted = sessionStorage.getItem('micGranted') === 'true';
             
-            // If session storage isn't set, try to query the browser permission API
             if (!isGranted && navigator.permissions && navigator.permissions.query) {
                 try {
                     const perm = await navigator.permissions.query({ name: 'microphone' });
@@ -372,14 +404,11 @@
             }
 
             if (isGranted) {
-                // Instantly hide the overlay to prevent the flashing screen
                 overlay.style.display = 'none';
-                // Start the engine quietly in the background
                 initializeRobot(true);
             }
         }
         
-        // Run bypass check immediately on load
         tryAutoStart();
 
         function animateFace() {
@@ -418,7 +447,16 @@
             } else {
                 targetSquint = 1.0;
                 targetSquintY = 0.0;
-                targetMouth = { w: 75, hTop: 0, hBottom: 0 };
+                
+                // --- NEW: Applying the Straight vs Smile State ---
+                if (isIdleSmile) {
+                    // Makes a cute U-shaped curve
+                    targetMouth = { w: 65, hTop: -25, hBottom: 25 }; 
+                } else {
+                    // Classic flat pill line
+                    targetMouth = { w: 75, hTop: 0, hBottom: 0 };
+                }
+                
                 targetOpacity = isPermanentMouth ? 1.0 : 0.0;
             }
 
