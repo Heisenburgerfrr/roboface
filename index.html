@@ -222,7 +222,7 @@
             statusText.innerText = "Establishing WebSocket link...";
 
             // Automatically grabs the IP of the machine hosting the website
-            const wsUrl = 'wss://compatibility-acdbentity-executed-decimal.trycloudflare.com'; 
+            const wsUrl = 'ws://localhost:7000'; 
             ws = new WebSocket(wsUrl);
 
             ws.onopen = async () => {
