@@ -1,4 +1,3 @@
-```markdown
 # 🤖 Real-Time AI Robot Face Lip-Sync
 
 A low-latency, real-time web interface that animates a robot face based on system audio. This project captures audio from an AI assistant (like Gemini) running on your PC, analyzes the volume and frequency in real-time, and streams the mouth movements to a mobile tablet over the internet using WebSockets and Cloudflare Tunnels.
