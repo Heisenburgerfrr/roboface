@@ -93,19 +93,6 @@ python find_devices.py
 
 Look through the terminal output for **CABLE Output (VB-Audio Virtual Cable)** and note its **Index Number** (e.g., `Index 2`).
 
-### 3. Setup the `.env` File
-
-Create a file named exactly `.env` in your project folder and paste the following, replacing `2` with your actual device index from the previous step:
-
-```env
-# The PyAudio index number of your VB-Cable Output
-AUDIO_INDEX=2
-
-# Network Ports
-WS_PORT=7000
-HTTP_PORT=8000
-
-```
 
 ---
 
