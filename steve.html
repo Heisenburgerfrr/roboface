@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Alive Steve (Bald Edition)</title>
+    <style>
+        /* Base page styling - Steve's Skin Tone Background */
+        body { margin: 0; padding: 0; background-color: #B07D60; display: flex; flex-direction: row; width: 100vw; height: 100vh; font-family: 'Courier New', Courier, monospace; color: white; overflow: hidden; }
+        svg { flex-grow: 1; height: 100%; }
+        svg * { shape-rendering: crispEdges; }
+        .eye, #jaw, #left-squint, #right-squint, #mouth-path { will-change: transform, opacity; }
+        .eye { transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1); }
+        .blink { transform: scaleY(0.1); }
+        @keyframes breathe { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+        #face-elements { animation: breathe 5s steps(2, end) infinite; }
+        #controls { width: 280px; height: 100vh; flex-shrink: 0; background-color: #585858; border-right: 4px solid #000000; box-shadow: inset 4px 0px 0px #828282; display: flex; flex-direction: column; align-items: center; padding: 30px 20px 60px 20px; box-sizing: border-box; gap: 15px; z-index: 5; overflow-y: auto; overflow-x: hidden; }
+        #controls::-webkit-scrollbar { width: 10px; }
+        #controls::-webkit-scrollbar-track { background: #444; border-left: 2px solid #000; }
+        #controls::-webkit-scrollbar-thumb { background: #727272; border: 2px solid #000; }
+        #controls::-webkit-scrollbar-thumb:hover { background: #828282; }
+        .sidebar-title { font-family: 'Courier New', Courier, monospace; color: white; margin: 0 0 5px 0; font-size: 1.5rem; text-shadow: 2px 2px 0px #000; text-align: center; letter-spacing: 2px; }
+        .ui-btn { width: 100%; background-color: #727272; color: #ffffff; border: 2px solid #000000; padding: 12px 10px; font-size: 0.9rem; font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer; box-shadow: inset -2px -2px 0px #3A3A3A, inset 2px 2px 0px #9E9E9E; text-transform: uppercase; transition: background-color 0.1s, transform 0.1s, box-shadow 0.1s; white-space: nowrap; }
+        .ui-btn:hover { background-color: #828282; }
+        .ui-btn:active { box-shadow: inset 2px 2px 0px #3A3A3A, inset -2px -2px 0px #9E9E9E; transform: translateY(2px); }
+        .ui-btn.active-toggle { background-color: #4CAF50; box-shadow: inset -2px -2px 0px #2E7D32, inset 2px 2px 0px #81C784; }
+        .ui-btn.active-toggle:active { box-shadow: inset 2px 2px 0px #2E7D32, inset -2px -2px 0px #81C784; }
+        .slider-container { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; background-color: #444; padding: 10px; border: 2px solid #000; box-shadow: inset -2px -2px 0px #222, inset 2px 2px 0px #666; margin-top: 5px; }
+        .slider-label { color: #4FF3FF; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; font-weight: bold; text-transform: uppercase; text-shadow: 1px 1px 0px #000; text-align: center; }
+        .ui-slider { -webkit-appearance: none; appearance: none; width: 100%; box-sizing: border-box; height: 12px; background: #2a2a2a; border: 2px solid #000000; outline: none; box-shadow: inset 2px 2px 0px #111, inset -1px -1px 0px #444; }
+        .ui-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 24px; background: #4CAF50; border: 2px solid #000; cursor: pointer; box-shadow: inset -2px -2px 0px #2E7D32, inset 2px 2px 0px #81C784; }
+        .ui-slider::-moz-range-thumb { width: 16px; height: 24px; background: #4CAF50; border: 2px solid #000; cursor: pointer; box-shadow: inset -2px -2px 0px #2E7D32, inset 2px 2px 0px #81C784; }
+        .slider-controls-row { display: flex; gap: 10px; margin-top: 5px; }
+        .slider-controls-row .ui-btn { padding: 5px; font-size: 1.4rem; }
+        :fullscreen #controls { display: none; }
+        :-webkit-full-screen #controls { display: none; }
+        :-moz-full-screen #controls { display: none; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        #start-btn { background-color: #4CAF50; color: white; border: 3px solid #000; padding: 15px 40px; font-size: 1.5rem; font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer; box-shadow: inset -4px -4px 0px #2E7D32, inset 4px 4px 0px #81C784; text-transform: uppercase; transition: transform 0.1s, background-color 0.1s, box-shadow 0.1s; }
+        #start-btn:hover { background-color: #66BB6A; }
+        #start-btn:active { box-shadow: inset 4px 4px 0px #2E7D32, inset -4px -4px 0px #81C784; transform: scale(0.96); }
+        #status { margin-top: 20px; font-size: 1.1rem; font-family: 'Courier New', Courier, monospace; color: #aaaaaa; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <h2 class="sidebar-title">CONTROLS</h2>
+        <button id="fullscreen-btn" class="ui-btn">Fullscreen</button>
+        <button id="nav-emo-btn" class="ui-btn">Switch to Emo</button>
+        <button id="toggle-mouth-style-btn" class="ui-btn">Mouth: 2D Blocky</button>
+        <button id="toggle-mouth-btn" class="ui-btn active-toggle">Mouth Line: ON</button>
+        <button id="toggle-idle-btn" class="ui-btn active-toggle" style="display: none;">Idle Jaw Drop: ON</button>
+        <button id="toggle-preset-btn" class="ui-btn">Sens: HIGH</button>
+        
+        <div class="slider-container">
+            <div id="threshold-val-display" class="slider-label">Noise Gate: 1.5</div>
+            <input type="range" id="threshold-slider" class="ui-slider" min="0.5" max="50" step="0.5" value="1.5">
+            <div class="slider-controls-row">
+                <button id="gate-down-btn" class="ui-btn">-</button>
+                <button id="gate-up-btn" class="ui-btn">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <button id="start-btn">Connect to Backend</button>
+        <div id="status">Waiting to connect to Python WebSocket...</div>
+    </div>
+
+    <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <g id="face-elements">
+            <g id="left-squint" style="transform-origin: 280px 170px;">
+                <g class="eye" style="transform-origin: 280px 170px;">
+                    <rect x="220" y="140" width="60" height="60" fill="#ffffff" />
+                    <rect x="280" y="140" width="60" height="60" fill="#494697" />
+                </g>
+            </g>
+
+            <g id="right-squint" style="transform-origin: 520px 170px;">
+                <g class="eye" style="transform-origin: 520px 170px;">
+                    <rect x="460" y="140" width="60" height="60" fill="#494697" />
+                    <rect x="520" y="140" width="60" height="60" fill="#ffffff" />
+                </g>
+            </g>
+
+            <g id="mouth-style-blocky">
+                <rect x="340" y="200" width="120" height="60" fill="#8B614A" /> 
+                <rect x="280" y="260" width="60" height="60" fill="#412A1B" /> 
+                <rect x="460" y="260" width="60" height="60" fill="#412A1B" /> 
+                <rect x="340" y="320" width="120" height="60" fill="#412A1B" /> 
+                <path id="mouth-path" fill="#1A110B" d="" style="opacity: 1;" />
+            </g>
+
+            <g id="mouth-style-3d" style="display:none;">
+                <rect x="340" y="200" width="120" height="60" fill="#8B614A" /> 
+                <rect x="340" y="260" width="120" height="120" fill="#1A0E08" /> 
+                <g id="jaw">
+                    <rect x="340" y="260" width="120" height="60" fill="#B07D60" /> 
+                    <rect x="280" y="260" width="60" height="60" fill="#412A1B" />
+                    <rect x="460" y="260" width="60" height="60" fill="#412A1B" />
+                    <rect x="280" y="320" width="240" height="60" fill="#412A1B" />
+                </g>
+            </g>
+        </g>
+    </svg>
+
+    <script>
+    (() => {
+        // --- Navigation & Fullscreen Logic ---
+        const navEmoBtn = document.getElementById('nav-emo-btn');
+        navEmoBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.log(err)); }
+        });
+
+        // --- Mouth Style Toggle & Button Switching ---
+        const toggleMouthStyleBtn = document.getElementById('toggle-mouth-style-btn');
+        const styleBlocky = document.getElementById('mouth-style-blocky');
+        const style3d = document.getElementById('mouth-style-3d');
+        const toggleMouthBtn = document.getElementById('toggle-mouth-btn');
+        const toggleIdleBtn = document.getElementById('toggle-idle-btn');
+        let isMouthBlocky = true;
+
+        toggleMouthStyleBtn.addEventListener('click', () => {
+            isMouthBlocky = !isMouthBlocky;
+            if (isMouthBlocky) {
+                toggleMouthStyleBtn.innerText = "Mouth: 2D Blocky";
+                styleBlocky.style.display = 'block';
+                style3d.style.display = 'none';
+                toggleMouthBtn.style.display = 'block';
+                toggleIdleBtn.style.display = 'none';
+            } else {
+                toggleMouthStyleBtn.innerText = "Mouth: 3D Dropping Jaw";
+                styleBlocky.style.display = 'none';
+                style3d.style.display = 'block';
+                toggleMouthBtn.style.display = 'none';
+                toggleIdleBtn.style.display = 'block';
+            }
+        });
+
+        // --- Permanent Mouth Toggle (For 2D Blocky) ---
+        let isPermanentMouth = true;
+        toggleMouthBtn.addEventListener('click', () => {
+            isPermanentMouth = !isPermanentMouth;
+            if (isPermanentMouth) {
+                toggleMouthBtn.innerText = "Mouth Line: ON";
+                toggleMouthBtn.classList.add('active-toggle');
+            } else {
+                toggleMouthBtn.innerText = "Mouth Line: OFF";
+                toggleMouthBtn.classList.remove('active-toggle');
+            }
+        });
+
+        // --- Idle Jaw Logic (For 3D Dropping Jaw) ---
+        let isIdleJaw = true;
+        toggleIdleBtn.addEventListener('click', () => {
+            isIdleJaw = !isIdleJaw;
+            if (isIdleJaw) {
+                toggleIdleBtn.innerText = "Idle Jaw Drop: ON";
+                toggleIdleBtn.classList.add('active-toggle');
+            } else {
+                toggleIdleBtn.innerText = "Idle Jaw Drop: OFF";
+                toggleIdleBtn.classList.remove('active-toggle');
+            }
+        });
+
+        // --- Synchronized Threshold / Slider Logic ---
+        const togglePresetBtn = document.getElementById('toggle-preset-btn');
+        const thresholdSlider = document.getElementById('threshold-slider');
+        const thresholdDisplay = document.getElementById('threshold-val-display');
+        const gateDownBtn = document.getElementById('gate-down-btn');
+        const gateUpBtn = document.getElementById('gate-up-btn');
+        const presets = [ { label: "Sens: HIGH", val: 1.5 }, { label: "Sens: MED", val: 5.0 }, { label: "Sens: LOW", val: 15.0 }, { label: "Sens: SPKR ONLY", val: 30.0 } ];
+        let presetIndex = 0;
+        let currentThreshold = presets[presetIndex].val;
+
+        function updateThresholdUI(newVal) {
+            currentThreshold = Math.max(0.5, Math.min(50.0, newVal));
+            thresholdSlider.value = currentThreshold;
+            thresholdDisplay.innerText = `Noise Gate: ${currentThreshold.toFixed(1)}`;
+            let matchedPreset = presets.find(p => p.val === currentThreshold);
+            if (matchedPreset) {
+                togglePresetBtn.innerText = matchedPreset.label;
+                presetIndex = presets.indexOf(matchedPreset);
+                if (presetIndex === 3) { togglePresetBtn.classList.add('active-toggle'); } else { togglePresetBtn.classList.remove('active-toggle'); }
+            } else {
+                togglePresetBtn.innerText = "Sens: CUSTOM";
+                togglePresetBtn.classList.remove('active-toggle');
+            }
+        }
+        togglePresetBtn.addEventListener('click', () => { presetIndex = (presetIndex + 1) % presets.length; updateThresholdUI(presets[presetIndex].val); });
+        thresholdSlider.addEventListener('input', (e) => { updateThresholdUI(parseFloat(e.target.value)); });
+        gateDownBtn.addEventListener('click', () => { updateThresholdUI(currentThreshold - 0.5); });
+        gateUpBtn.addEventListener('click', () => { updateThresholdUI(currentThreshold + 0.5); });
+
+        // Screen Wake Lock Logic
+        let wakeLock = null;
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try { wakeLock = await navigator.wakeLock.request('screen'); } 
+                catch (err) { console.error(`Wake Lock error: ${err.message}`); }
+            }
+        }
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') { await requestWakeLock(); }
+        });
+
+        // --- NEW NETWORK AUDIO LOGIC ---
+        let animationFrameId; 
+        const mouthPath = document.getElementById('mouth-path');
+        const jawGroup = document.getElementById('jaw');
+        const leftSquint = document.getElementById('left-squint');
+        const rightSquint = document.getElementById('right-squint');
+        const startBtn = document.getElementById('start-btn');
+        const overlay = document.getElementById('overlay');
+        const statusText = document.getElementById('status');
+        const allEyes = document.querySelectorAll('.eye');
+
+        const mouthCenter = { x: 400, y: 290 };
+        const mouthThickness = 30; 
+        const defaultMouthWidth = 60; 
+        
+        let currentMouth = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
+        let targetMouth  = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
+        let currentOpacity = 1.0;
+        let targetOpacity = 1.0;
+        let currentJawDrop = 0.0;
+        let targetJawDrop = 0.0;
+        let currentSquintY = 0.0;
+        let targetSquintY = 0.0;
+
+        function lerp(start, end, factor) { return start + (end - start) * factor; }
+
+        let netVolume = 0;
+        let ws;
+
+        // Ensure this line stays exactly formatted so Python can rewrite it
+        const wsUrl = 'wss://compatibility-acdbentity-executed-decimal.trycloudflare.com'; 
+
+        function connectWebSocket() {
+            startBtn.innerText = "Connecting...";
+            statusText.innerText = "Establishing WebSocket link...";
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = async () => {
+                overlay.style.display = 'none';
+                await requestWakeLock();
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = requestAnimationFrame(animateFace);
+                scheduleBlink();
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                netVolume = data.v; // Only reading volume for Steve!
+            };
+
+            ws.onerror = (err) => {
+                console.error("WebSocket Error:", err);
+                overlay.style.display = 'flex';
+                statusText.innerText = "Error: Cannot connect to Python backend.";
+                startBtn.innerText = "Try Again";
+            };
+
+            ws.onclose = () => {
+                overlay.style.display = 'flex';
+                statusText.innerText = "Connection lost. Please restart.";
+                startBtn.innerText = "Reconnect";
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            };
+        }
+
+        startBtn.addEventListener('click', connectWebSocket);
+
+        function animateFace() {
+            let volume = netVolume;
+
+            if (volume > currentThreshold) { 
+                let volFactor = Math.min(volume / 15, 1.3); 
+
+                targetOpacity = 1.0;
+                targetSquintY = -(volFactor * 4); 
+                
+                targetMouth = { w: defaultMouthWidth, hTop: 0, hBottom: 10 + (volFactor * 50) };
+                targetJawDrop = 5 + (volFactor * 45); 
+
+            } else {
+                targetSquintY = 0.0;
+                targetMouth = { w: defaultMouthWidth, hTop: 0, hBottom: 0 };
+                targetOpacity = isPermanentMouth ? 1.0 : 0.0; 
+                targetJawDrop = isIdleJaw ? 5.0 : 0.0; 
+            }
+
+            currentOpacity = lerp(currentOpacity, targetOpacity, 0.15);
+            currentMouth.hBottom = lerp(currentMouth.hBottom, targetMouth.hBottom, 0.15);
+            currentJawDrop = lerp(currentJawDrop, targetJawDrop, 0.25);
+            currentSquintY = lerp(currentSquintY, targetSquintY, 0.15);
+
+            leftSquint.style.transform = `translateY(${currentSquintY}px)`;
+            rightSquint.style.transform = `translateY(${currentSquintY}px)`;
+            jawGroup.style.transform = `translateY(${currentJawDrop}px)`;
+            mouthPath.style.opacity = currentOpacity;
+
+            const x1 = mouthCenter.x - currentMouth.w;
+            const x2 = mouthCenter.x + currentMouth.w;
+            const y1 = mouthCenter.y - mouthThickness; 
+            const y2 = mouthCenter.y + mouthThickness + currentMouth.hBottom; 
+            const d = `M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y2} L ${x1} ${y2} Z`;
+            mouthPath.setAttribute('d', d);
+
+            animationFrameId = requestAnimationFrame(animateFace);
+        }
+
+        function triggerBlink() {
+            allEyes.forEach(eye => eye.classList.add('blink'));
+            setTimeout(() => { allEyes.forEach(eye => eye.classList.remove('blink')); }, 120); 
+        }
+
+        function scheduleBlink() {
+            const nextBlink = Math.random() * 3500 + 2000; 
+            setTimeout(() => {
+                triggerBlink();
+                if (Math.random() < 0.20) { setTimeout(triggerBlink, 200); }
+                scheduleBlink();
+            }, nextBlink);
+        }
+    })();
+    </script>
+</body>
+</html>
