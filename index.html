@@ -54,7 +54,7 @@
 
         /* --- Sidebar Controls --- */
         #controls {
-            width: 260px;
+            width: 280px; /* INCREASED width to prevent button text from wrapping */
             height: 100vh;
             flex-shrink: 0; 
             background-color: #585858;
@@ -63,16 +63,35 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px 20px;
+            /* ADDED bottom padding so the slider is fully visible when scrolling */
+            padding: 30px 20px 60px 20px; 
             box-sizing: border-box;
-            gap: 20px;
+            gap: 15px; 
             z-index: 5;
+            overflow-y: auto; /* Vertical scroll enabled */
+            overflow-x: hidden; 
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        #controls::-webkit-scrollbar {
+            width: 10px;
+        }
+        #controls::-webkit-scrollbar-track {
+            background: #444; 
+            border-left: 2px solid #000;
+        }
+        #controls::-webkit-scrollbar-thumb {
+            background: #727272; 
+            border: 2px solid #000;
+        }
+        #controls::-webkit-scrollbar-thumb:hover {
+            background: #828282; 
         }
 
         .sidebar-title {
             font-family: 'Courier New', Courier, monospace;
             color: white;
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             font-size: 1.5rem;
             text-shadow: 2px 2px 0px #000;
             text-align: center;
@@ -84,14 +103,15 @@
             background-color: #727272;
             color: #ffffff;
             border: 2px solid #000000;
-            padding: 12px 15px;
-            font-size: 1rem;
+            padding: 12px 10px;
+            font-size: 0.9rem; /* Slightly smaller to fit long text safely */
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
             cursor: pointer;
             box-shadow: inset -2px -2px 0px #3A3A3A, inset 2px 2px 0px #9E9E9E;
             text-transform: uppercase;
             transition: background-color 0.1s, transform 0.1s, box-shadow 0.1s;
+            white-space: nowrap; /* Forces text to stay on one line */
         }
 
         .ui-btn:hover {
@@ -110,6 +130,73 @@
 
         .ui-btn.active-toggle:active {
             box-shadow: inset 2px 2px 0px #2E7D32, inset -2px -2px 0px #81C784;
+        }
+
+        /* --- Minecraft Style Custom Slider --- */
+        .slider-container {
+            width: 100%;
+            box-sizing: border-box; 
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: #444;
+            padding: 10px;
+            border: 2px solid #000;
+            box-shadow: inset -2px -2px 0px #222, inset 2px 2px 0px #666;
+            margin-top: 5px;
+        }
+
+        .slider-label {
+            color: #4FF3FF; 
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0px #000;
+            text-align: center;
+        }
+
+        .ui-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            box-sizing: border-box;
+            height: 12px;
+            background: #2a2a2a;
+            border: 2px solid #000000;
+            outline: none;
+            box-shadow: inset 2px 2px 0px #111, inset -1px -1px 0px #444;
+        }
+
+        .ui-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 24px;
+            background: #4CAF50;
+            border: 2px solid #000;
+            cursor: pointer;
+            box-shadow: inset -2px -2px 0px #2E7D32, inset 2px 2px 0px #81C784;
+        }
+
+        .ui-slider::-moz-range-thumb {
+            width: 16px;
+            height: 24px;
+            background: #4CAF50;
+            border: 2px solid #000;
+            cursor: pointer;
+            box-shadow: inset -2px -2px 0px #2E7D32, inset 2px 2px 0px #81C784;
+        }
+
+        .slider-controls-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .slider-controls-row .ui-btn {
+            padding: 5px;
+            font-size: 1.4rem;
         }
 
         /* Automatically hide the controls when actually in fullscreen */
@@ -169,13 +256,22 @@
 
     <div id="controls">
         <h2 class="sidebar-title">CONTROLS</h2>
+        <button id="fullscreen-btn" class="ui-btn">Fullscreen</button>
         <button id="nav-steve-btn" class="ui-btn">Switch to Steve</button>
         <button id="toggle-eye-btn" class="ui-btn">Shape: Squircle</button>
-        
         <button id="toggle-idle-mouth-btn" class="ui-btn">Idle Mouth: Straight</button>
-        
         <button id="toggle-mouth-btn" class="ui-btn active-toggle">Mouth Line: ON</button>
-        <button id="fullscreen-btn" class="ui-btn">Fullscreen</button>
+        
+        <button id="toggle-preset-btn" class="ui-btn">Sens: HIGH</button>
+        
+        <div class="slider-container">
+            <div id="threshold-val-display" class="slider-label">Noise Gate: 1.5</div>
+            <input type="range" id="threshold-slider" class="ui-slider" min="0.5" max="50" step="0.5" value="1.5">
+            <div class="slider-controls-row">
+                <button id="gate-down-btn" class="ui-btn">-</button>
+                <button id="gate-up-btn" class="ui-btn">+</button>
+            </div>
+        </div>
     </div>
 
     <div id="overlay">
@@ -269,7 +365,62 @@
             toggleEyeBtn.innerText = modeNames[eyeMode];
         });
 
-        // --- NEW: Idle Mouth Style Toggle ---
+        // --- Synchronized Threshold / Slider Logic ---
+        const togglePresetBtn = document.getElementById('toggle-preset-btn');
+        const thresholdSlider = document.getElementById('threshold-slider');
+        const thresholdDisplay = document.getElementById('threshold-val-display');
+        const gateDownBtn = document.getElementById('gate-down-btn');
+        const gateUpBtn = document.getElementById('gate-up-btn');
+
+        const presets = [
+            { label: "Sens: HIGH", val: 1.5 },
+            { label: "Sens: MED", val: 5.0 },
+            { label: "Sens: LOW", val: 15.0 },
+            { label: "Sens: SPKR ONLY", val: 30.0 }
+        ];
+        
+        let presetIndex = 0;
+        let currentThreshold = presets[presetIndex].val;
+
+        function updateThresholdUI(newVal) {
+            currentThreshold = Math.max(0.5, Math.min(50.0, newVal));
+            
+            thresholdSlider.value = currentThreshold;
+            thresholdDisplay.innerText = `Noise Gate: ${currentThreshold.toFixed(1)}`;
+            
+            let matchedPreset = presets.find(p => p.val === currentThreshold);
+            if (matchedPreset) {
+                togglePresetBtn.innerText = matchedPreset.label;
+                presetIndex = presets.indexOf(matchedPreset);
+                if (presetIndex === 3) {
+                    togglePresetBtn.classList.add('active-toggle');
+                } else {
+                    togglePresetBtn.classList.remove('active-toggle');
+                }
+            } else {
+                togglePresetBtn.innerText = "Sens: CUSTOM";
+                togglePresetBtn.classList.remove('active-toggle');
+            }
+        }
+
+        togglePresetBtn.addEventListener('click', () => {
+            presetIndex = (presetIndex + 1) % presets.length;
+            updateThresholdUI(presets[presetIndex].val);
+        });
+
+        thresholdSlider.addEventListener('input', (e) => {
+            updateThresholdUI(parseFloat(e.target.value));
+        });
+
+        gateDownBtn.addEventListener('click', () => {
+            updateThresholdUI(currentThreshold - 0.5);
+        });
+
+        gateUpBtn.addEventListener('click', () => {
+            updateThresholdUI(currentThreshold + 0.5);
+        });
+
+        // --- Idle Mouth Style Toggle ---
         const toggleIdleMouthBtn = document.getElementById('toggle-idle-mouth-btn');
         let isIdleSmile = false;
 
@@ -349,7 +500,14 @@
                     statusText.innerText = "Requesting microphone access...";
                 }
                 
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        autoGainControl: false,
+                        echoCancellation: false,
+                        noiseSuppression: false
+                    }, 
+                    video: false 
+                });
                 sessionStorage.setItem('micGranted', 'true'); 
                 
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -430,7 +588,9 @@
             const lowAvg = lowSum / 8;
             const midAvg = midSum / 20;
 
-            if (volume > 1.5) { 
+            if (volume > currentThreshold) { 
+                
+                // FIX: Reverted to the original absolute volume math to restore full mouth bounce
                 let volFactor = Math.min(volume / 15, 1.3); 
 
                 targetOpacity = 1.0;
@@ -448,19 +608,15 @@
                 targetSquint = 1.0;
                 targetSquintY = 0.0;
                 
-                // --- NEW: Applying the Straight vs Smile State ---
                 if (isIdleSmile) {
-                    // Makes a cute U-shaped curve
                     targetMouth = { w: 65, hTop: -25, hBottom: 25 }; 
                 } else {
-                    // Classic flat pill line
                     targetMouth = { w: 75, hTop: 0, hBottom: 0 };
                 }
                 
                 targetOpacity = isPermanentMouth ? 1.0 : 0.0;
             }
 
-            // Lerp everything for smooth gliding
             currentMouth.w = lerp(currentMouth.w, targetMouth.w, 0.15);
             currentMouth.hTop = lerp(currentMouth.hTop, targetMouth.hTop, 0.15);
             currentMouth.hBottom = lerp(currentMouth.hBottom, targetMouth.hBottom, 0.15);
@@ -469,12 +625,10 @@
             currentSquintY = lerp(currentSquintY, targetSquintY, 0.15);
             currentOpacity = lerp(currentOpacity, targetOpacity, 0.15);
 
-            // Apply Squints to Wrapper Groups
             leftSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
             rightSquint.setAttribute('transform', `translate(0, ${currentSquintY}) scale(1, ${currentSquint})`);
             mouthPath.style.opacity = currentOpacity;
 
-            // Path Generation for Mouth
             const x1 = mouthCenter.x - currentMouth.w;
             const x2 = mouthCenter.x + currentMouth.w;
             const y1 = mouthCenter.y - mouthThickness;
